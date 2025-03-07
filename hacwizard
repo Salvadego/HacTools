@@ -358,6 +358,33 @@ cmd_current() {
     echo -e "${BOLD}Active client:${NC} $active_client"
     echo -e "${BOLD}HAC URL:${NC} $hac_url"
     echo -e "${BOLD}Username:${NC} $username"
+
+    if [ -z "${HYBRIS_HAC_URL}" ] || [ -z "${HYBRIS_USER}" ] || [ -z "${HYBRIS_PASSWORD}" ] || [ -z "${HACCLI_ACTIVE_CLIENT}" ]; then
+        echo
+        print_error "Warning: Active client configuration is not properly sourced in your current shell!"
+        local init_file
+        if [ -n "$ZSH_VERSION" ]; then
+            init_file="$HOME/.zshrc"
+        elif [ -n "$BASH_VERSION" ]; then
+            init_file="$HOME/.bashrc"
+        else
+            init_file="$HOME/.profile"
+        fi
+        print_info "Please add the following line to your ${init_file}:"
+        echo -e "${YELLOW}[ -f \"$CONFIG_DIR/active_client\" ] && source \"$CONFIG_DIR/active_client\"${NC}"
+        print_info "Then restart your shell or run: source \"$CONFIG_DIR/active_client\""
+    else
+        if [ "${HYBRIS_HAC_URL}" != "${hac_url}" ] || 
+           [ "${HYBRIS_USER}" != "${username}" ] || 
+           [ "${HACCLI_ACTIVE_CLIENT}" != "${active_client}" ]; then
+            echo
+            print_error "Warning: Environment variables don't match the active client configuration!"
+            print_info "Your shell might be using outdated values. Please source the current configuration:"
+            echo -e "${YELLOW}source \"$CONFIG_DIR/active_client\"${NC}"
+        else
+            print_success "Environment variables are correctly set in your current shell."
+        fi
+    fi
 }
 
 main() {
