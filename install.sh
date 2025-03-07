@@ -164,6 +164,11 @@ if [[ ":$PATH:" != *":$HACTOOLS_BIN_DIR:"* ]]; then
   echo
 fi
 
+echo "Installing wizard"
+
+wget -c "https://raw.githubusercontent.com/Salvadego/HacTools/refs/heads/main/hacwizard" -O "$HACTOOLS_BIN_DIR/haccli"
+chmod +x "$HACTOOLS_BIN_DIR/haccli"
+
 # Add example usage
 echo "Installation completed!"
 
