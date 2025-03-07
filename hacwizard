@@ -1,0 +1,408 @@
+#!/usr/bin/env bash
+
+set -e
+
+VERSION="1.0.0"
+PROG_NAME="haccli"
+CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/$PROG_NAME"
+CLIENTS_DIR="$CONFIG_DIR/clients"
+
+mkdir -p "$CLIENTS_DIR"
+
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+BLUE='\033[0;34m'
+YELLOW='\033[0;33m'
+CYAN='\033[0;36m'
+MAGENTA='\033[0;35m'
+BOLD='\033[1m'
+NC='\033[0m'
+
+print_header() {
+    echo -e "${BOLD}${BLUE}===== $1 =====${NC}"
+}
+
+print_success() {
+    echo -e "${GREEN}✓ $1${NC}"
+}
+
+print_error() {
+    echo -e "${RED}✗ $1${NC}" >&2
+}
+
+print_info() {
+    echo -e "${CYAN}ℹ $1${NC}"
+}
+
+print_version() {
+    echo -e "${PROG_NAME} version ${VERSION}"
+}
+
+print_usage() {
+    echo -e "${BOLD}${PROG_NAME}${NC} - Hybris Administration Console CLI Tool"
+    echo
+
+    echo -e "${BOLD}USAGE:${NC}"
+    echo -e "  ${PROG_NAME} [COMMAND]"
+    echo
+
+    echo -e "${BOLD}COMMANDS:${NC}"
+    cat << EOF
+    select        Select and activate a client configuration
+    new           Create a new client configuration
+    wizard        Interactive configuration wizard
+    list          List all available client configurations
+    remove        Remove a client configuration
+    edit          Edit a client configuration
+    current       Show current active configuration
+    help          Show this help message
+    version       Show version information
+EOF
+}
+
+check_dependencies() {
+    local missing_deps=()
+    local deps=( "fzf" "bat" )
+
+    for cmd in ${deps[@]}; do
+        if ! command -v $cmd &> /dev/null; then
+            missing_deps+=("$cmd")
+        fi
+    done
+
+    if [ ${#missing_deps[@]} -ne 0 ]; then
+        print_error "Missing dependencies: ${missing_deps[*]}"
+        print_info "Please install the required dependencies and try again."
+        exit 1
+    fi
+}
+
+load_client_config() {
+    local client_file="$1"
+
+    if [ ! -f "$client_file" ]; then
+        print_error "Client configuration file not found: $client_file"
+        return 1
+    fi
+
+    . "$client_file"
+
+    local init_file
+    if [ -n "$ZSH_VERSION" ]; then
+        init_file="$HOME/.zshrc"
+    elif [ -n "$BASH_VERSION" ]; then
+        init_file="$HOME/.bashrc"
+    else
+        init_file="$HOME/.profile"
+    fi
+
+    echo "export HACCLI_ACTIVE_CLIENT=\"$(basename "$client_file")\"" > "$CONFIG_DIR/active_client"
+    echo "export HYBRIS_HAC_URL=\"$HYBRIS_HAC_URL\"" >> "$CONFIG_DIR/active_client"
+    echo "export HYBRIS_USER=\"$HYBRIS_USER\"" >> "$CONFIG_DIR/active_client"
+    echo "export HYBRIS_PASSWORD=\"$HYBRIS_PASSWORD\"" >> "$CONFIG_DIR/active_client"
+
+    print_info "To persist these environment variables, add this line to your ${init_file} or in your shell rc:"
+    echo -e "${YELLOW}[ -f \"$CONFIG_DIR/active_client\" ] && source \"$CONFIG_DIR/active_client\"${NC}"
+
+    print_success "Client configuration activated: $(basename "$client_file")"
+    print_info "HAC URL: $HYBRIS_HAC_URL"
+    print_info "Username: $HYBRIS_USER"
+}
+
+cmd_select() {
+    print_header "Select Client Configuration"
+
+    if [ -z "$(ls -A "$CLIENTS_DIR" 2>/dev/null)" ]; then
+        print_error "No client configurations found."
+        print_info "Use '${PROG_NAME} new' to create a new client configuration."
+        return 1
+    fi
+
+    local file
+    file=$(ls -A "$CLIENTS_DIR" | fzf --prompt="Select client: " --preview="bat $CLIENTS_DIR/{}")
+
+    if [ -z "$file" ]; then
+        print_info "No client selected."
+        return 0
+    fi
+
+    load_client_config "$CLIENTS_DIR/$file"
+}
+
+cmd_new() {
+    print_header "Create New Client Configuration"
+
+    local client hac_url hac_username hac_pass
+
+    echo -e "${BOLD}Client name:${NC} "
+    read -e client
+
+    if [ -z "$client" ]; then
+        print_error "Client name cannot be empty."
+        return 1
+    fi
+
+    if [ -f "$CLIENTS_DIR/$client" ]; then
+        print_error "Client '$client' already exists."
+        print_info "Use '${PROG_NAME} edit $client' to modify the existing configuration."
+        return 1
+    fi
+
+    echo -e "${BOLD}HAC URL:${NC} "
+    read -e hac_url
+
+    echo -e "${BOLD}Username:${NC} "
+    read -e hac_username
+
+    echo -e "${BOLD}Password:${NC} "
+    read -es hac_pass
+    echo
+
+    cat << EOF > "$CLIENTS_DIR/$client"
+export HYBRIS_HAC_URL="$hac_url"
+export HYBRIS_USER="$hac_username"
+export HYBRIS_PASSWORD="$hac_pass"
+EOF
+
+    chmod +x "$CLIENTS_DIR/$client"
+
+    print_success "Client configuration created: $client"
+
+    echo -e "${BOLD}Activate this client now? [y/N]${NC} "
+    read -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        load_client_config "$CLIENTS_DIR/$client"
+    fi
+}
+
+cmd_wizard() {
+    print_header "Configuration Wizard"
+
+    local existing_clients=0
+    if [ -n "$(ls -A "$CLIENTS_DIR" 2>/dev/null)" ]; then
+        existing_clients=1
+    fi
+
+    local options
+    if [ $existing_clients -eq 1 ]; then
+        options=("Select existing client" "Create new client" "Edit existing client" "Remove client" "Exit wizard")
+    else
+        options=("Create new client" "Exit wizard")
+    fi
+
+    PS3="Please select an option: "
+    select opt in "${options[@]}"; do
+        case $opt in
+            "Select existing client")
+                cmd_select
+                break
+                ;;
+            "Create new client")
+                cmd_new
+                break
+                ;;
+            "Edit existing client")
+                cmd_edit
+                break
+                ;;
+            "Remove client")
+                cmd_remove
+                break
+                ;;
+            "Exit wizard")
+                print_info "Exiting wizard."
+                break
+                ;;
+            *) 
+                print_error "Invalid option. Please try again."
+                ;;
+        esac
+    done
+}
+
+cmd_list() {
+    print_header "Available Client Configurations"
+
+    if [ -z "$(ls -A "$CLIENTS_DIR" 2>/dev/null)" ]; then
+        print_info "No client configurations found."
+        return 0
+    fi
+
+    local active_client=""
+    if [ -f "$CONFIG_DIR/active_client" ]; then
+        active_client=$(grep "HACCLI_ACTIVE_CLIENT" "$CONFIG_DIR/active_client" | cut -d'"' -f2)
+    fi
+
+    echo -e "${BOLD}CLIENTS:${NC}"
+    for client in "$CLIENTS_DIR"/*; do
+        client_name=$(basename "$client")
+        if [ "$client_name" = "$active_client" ]; then
+            echo -e "  ${GREEN}${client_name} (active)${NC}"
+        else
+            echo "  $client_name"
+        fi
+    done
+}
+
+cmd_remove() {
+    print_header "Remove Client Configuration"
+
+    if [ -z "$(ls -A "$CLIENTS_DIR" 2>/dev/null)" ]; then
+        print_error "No client configurations found."
+        return 1
+    fi
+
+    local file
+    file=$(ls -A "$CLIENTS_DIR" | fzf --prompt="Select client: " --preview="bat $CLIENTS_DIR/{}")
+
+    if [ -z "$file" ]; then
+        print_info "No client selected."
+        return 0
+    fi
+
+    echo -e "${BOLD}${RED}Are you sure you want to remove '$file'? [y/N]${NC} "
+    read -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        rm -f "$CLIENTS_DIR/$file"
+        print_success "Client configuration removed: $file"
+
+        local active_client=""
+        if [ -f "$CONFIG_DIR/active_client" ]; then
+            active_client=$(grep "HACCLI_ACTIVE_CLIENT" "$CONFIG_DIR/active_client" | cut -d'"' -f2)
+            if [ "$active_client" = "$file" ]; then
+                rm -f "$CONFIG_DIR/active_client"
+                print_info "Active client configuration was cleared."
+            fi
+        fi
+    else
+        print_info "Operation cancelled."
+    fi
+}
+
+cmd_edit() {
+    print_header "Edit Client Configuration"
+
+    if [ -z "$(ls -A "$CLIENTS_DIR" 2>/dev/null)" ]; then
+        print_error "No client configurations found."
+        return 1
+    fi
+
+    local file client_file
+    if [ -n "$1" ]; then
+        file="$1"
+        client_file="$CLIENTS_DIR/$file"
+        if [ ! -f "$client_file" ]; then
+            print_error "Client '$file' not found."
+            return 1
+        fi
+    else
+        file=$(ls -A "$CLIENTS_DIR" | fzf --prompt="Select client to edit: ")
+        if [ -z "$file" ]; then
+            print_info "No client selected."
+            return 0
+        fi
+        client_file="$CLIENTS_DIR/$file"
+    fi
+
+    local current_url=$(grep "HYBRIS_HAC_URL" "$client_file" | cut -d'"' -f2)
+    local current_user=$(grep "HYBRIS_USER" "$client_file" | cut -d'"' -f2)
+    local current_pass=$(grep "HYBRIS_PASSWORD" "$client_file" | cut -d'"' -f2)
+
+    echo -e "${BOLD}Editing client:${NC} $file"
+
+    echo -e "${BOLD}HAC URL${NC} [${current_url}]: "
+    read -e hac_url
+    hac_url=${hac_url:-$current_url}
+
+    echo -e "${BOLD}Username${NC} [${current_user}]: "
+    read -e hac_username
+    hac_username=${hac_username:-$current_user}
+
+    echo -e "${BOLD}Password${NC} [leave empty to keep current]: "
+    read -es hac_pass
+    echo
+    hac_pass=${hac_pass:-$current_pass}
+
+    cat << EOF > "$client_file"
+export HYBRIS_HAC_URL="$hac_url"
+export HYBRIS_USER="$hac_username"
+export HYBRIS_PASSWORD="$hac_pass"
+EOF
+
+    chmod +x "$client_file"
+
+    print_success "Client configuration updated: $file"
+
+    echo -e "${BOLD}Activate this client now? [y/N]${NC} "
+    read -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+        load_client_config "$client_file"
+    fi
+}
+
+cmd_current() {
+    print_header "Current Active Configuration"
+
+    if [ ! -f "$CONFIG_DIR/active_client" ]; then
+        print_info "No active client configuration."
+        return 0
+    fi
+
+    local active_client=$(grep "HACCLI_ACTIVE_CLIENT" "$CONFIG_DIR/active_client" | cut -d'"' -f2)
+    local hac_url=$(grep "HYBRIS_HAC_URL" "$CONFIG_DIR/active_client" | cut -d'"' -f2)
+    local username=$(grep "HYBRIS_USER" "$CONFIG_DIR/active_client" | cut -d'"' -f2)
+
+    echo -e "${BOLD}Active client:${NC} $active_client"
+    echo -e "${BOLD}HAC URL:${NC} $hac_url"
+    echo -e "${BOLD}Username:${NC} $username"
+}
+
+main() {
+    check_dependencies
+
+    local cmd="$1"
+    shift || true
+
+    case "$cmd" in
+        select|s)
+            cmd_select "$@"
+            ;;
+        new|n)
+            cmd_new "$@"
+            ;;
+        wizard|w)
+            cmd_wizard "$@"
+            ;;
+        list|ls|l)
+            cmd_list "$@"
+            ;;
+        remove|rm|r)
+            cmd_remove "$@"
+            ;;
+        edit|e)
+            cmd_edit "$@"
+            ;;
+        current|c)
+            cmd_current "$@"
+            ;;
+        help|h|--help|-h)
+            print_usage
+            ;;
+        version|v|--version|-v)
+            print_version
+            ;;
+        "")
+            cmd_wizard
+            ;;
+        *)
+            print_error "Unknown command: $cmd"
+            print_usage
+            exit 1
+            ;;
+    esac
+}
+
+main "$@"

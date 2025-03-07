@@ -118,7 +118,7 @@ for cmd in "${HACTOOLS_CMDS[@]}"; do
     xg) src_cmd="groovy" ;;
     ii) src_cmd="impex" ;;
   esac
-  
+
   if [ -f "$GOPATH/bin/$src_cmd" ]; then
     cp "$GOPATH/bin/$src_cmd" "$HACTOOLS_BIN_DIR/$cmd"
   elif [ -f "$HOME/go/bin/$src_cmd" ]; then
