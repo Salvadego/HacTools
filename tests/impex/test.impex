@@ -1,0 +1,9 @@
+
+$catalogVersion=catalogVersion(catalog(id[default='clothescatalog']), version[default='Staged'])[unique=true,default='clothescatalog:Staged']
+$prices=europe1Prices[translator=de.hybris.platform.europe1.jalo.impex.Europe1PricesTranslator]
+$baseProduct=baseProduct(code, catalogVersion(catalog(id[default='clothescatalog']), version[default='Staged']));;;;;;;;
+
+INSERT_UPDATE Product;code[unique=true];name[lang=en];name[lang=de];unit(code);$catalogVersion; description[lang=en]; description[lang=de]; approvalStatus(code);supercategories(code)
+;sampleproduct1;SampleProduct1;Testprodukt1;pieces;clothescatalog:Online;"This is a sample product";"Dies ist ein Testprodukt";approved;SampleCategory
+;sampleproduct2;SampleProduct2;Testprodukt2;pieces;clothescatalog:Online;"This is another sample product";"Dies ist ein weiteres Testprodukt";approved;SampleCategory
+;sampleproduct3;SampleProduct3;Testprodukt3;pieces;clothescatalog:Online;"This is the third sample product";"Dies ist das dritte Testprodukt";approved;SampleCategory
