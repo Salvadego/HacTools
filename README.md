@@ -24,10 +24,10 @@ For convenience, you can use this installation script:
 
 ```bash
 # Install or update to the latest version
-curl -sSL https://raw.githubusercontent.com/SalvadegoDev/HacTools/main/install.sh | bash
+curl -sSL https://raw.githubusercontent.com/SalvadegoDev/HacTools/refs/heads/main/install.sh | bash
 
 # Install specific version
-curl -sSL https://raw.githubusercontent.com/SalvadegoDev/HacTools/main/install.sh | bash -s v1.0.0
+curl -sSL https://raw.githubusercontent.com/SalvadegoDev/HacTools/refs/heads/main/install.sh | bash -s v1.0.0
 ```
 
 ## Usage
