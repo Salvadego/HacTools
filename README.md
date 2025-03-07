@@ -1,4 +1,4 @@
-# HybrisTools
+# HacTools
 
 CLI tools for easy interaction with SAP Hybris HAC (Hybris Administration Console).
 
@@ -13,21 +13,21 @@ CLI tools for easy interaction with SAP Hybris HAC (Hybris Administration Consol
 ### Using Go Install
 
 ```bash
-go install github.com/matsal007/hybristools/cmd/flex@latest
-go install github.com/matsal007/hybristools/cmd/groovy@latest  
-go install github.com/matsal007/hybristools/cmd/impex@latest
+go install github.com/SalvdegoDev/HacTools/cmd/flex@latest
+go install github.com/SalvdegoDev/HacTools/cmd/groovy@latest
+go install github.com/SalvdegoDev/HacTools/cmd/impex@latest
 ```
 
 ### Using Installation Script
 
-For convenience, you can use our installation script:
+For convenience, you can use this installation script:
 
 ```bash
 # Install or update to the latest version
-curl -sSL https://raw.githubusercontent.com/matsal007/hybristools/main/install.sh | bash
+curl -sSL https://raw.githubusercontent.com/SalvdegoDev/HacTools/main/install.sh | bash
 
 # Install specific version
-curl -sSL https://raw.githubusercontent.com/matsal007/hybristools/main/install.sh | bash -s v1.0.0
+curl -sSL https://raw.githubusercontent.com/SalvdegoDev/HacTools/main/install.sh | bash -s v1.0.0
 ```
 
 ## Usage
@@ -145,8 +145,8 @@ All commands share these common options:
 
 ```bash
 # Clone the repository
-git clone https://github.com/matsal007/hybristools.git
-cd hybristools
+git clone https://github.com/SalvdegoDev/HacTools.git
+cd HacTools
 
 # Build all tools
 go build -o bin/xf ./cmd/flex
