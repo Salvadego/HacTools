@@ -1,4 +1,4 @@
-module github.com/matsal007/hactools
+module github.com/SalvadegoDev/HacTools
 
 go 1.24.0
 

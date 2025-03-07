@@ -6,8 +6,8 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/matsal007/hactools/internal/logger"
-	"github.com/matsal007/hactools/internal/models"
+	"github.com/SalvadegoDev/HacTools/internal/logger"
+	"github.com/SalvadegoDev/HacTools/internal/models"
 )
 
 func (c *HACClient) ExecuteFlexSearch(data map[string]any, blacklist []string) (*models.FlexSearchResponse, error) {

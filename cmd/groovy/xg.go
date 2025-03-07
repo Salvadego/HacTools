@@ -5,11 +5,11 @@ import (
 	"os"
 	"strings"
 
-	"github.com/matsal007/hactools/internal/client"
-	"github.com/matsal007/hactools/internal/groovy"
-	"github.com/matsal007/hactools/internal/logger"
-	"github.com/matsal007/hactools/internal/models"
-	"github.com/matsal007/hactools/internal/options"
+	"github.com/SalvadegoDev/HacTools/internal/client"
+	"github.com/SalvadegoDev/HacTools/internal/groovy"
+	"github.com/SalvadegoDev/HacTools/internal/logger"
+	"github.com/SalvadegoDev/HacTools/internal/models"
+	"github.com/SalvadegoDev/HacTools/internal/options"
 	"github.com/spf13/cobra"
 )
 

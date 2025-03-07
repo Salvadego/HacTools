@@ -7,8 +7,8 @@ import (
 	"mime/multipart"
 	"os"
 
-	"github.com/matsal007/hactools/internal/client"
-	"github.com/matsal007/hactools/internal/models"
+	"github.com/SalvadegoDev/HacTools/internal/client"
+	"github.com/SalvadegoDev/HacTools/internal/models"
 )
 
 type ImpexImporter struct {

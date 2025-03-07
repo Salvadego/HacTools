@@ -7,8 +7,8 @@ import (
 	"os/exec"
 	"strings"
 
-	"github.com/matsal007/hactools/internal/client"
-	"github.com/matsal007/hactools/internal/models"
+	"github.com/SalvadegoDev/HacTools/internal/client"
+	"github.com/SalvadegoDev/HacTools/internal/models"
 	"github.com/olekukonko/tablewriter"
 )
 
