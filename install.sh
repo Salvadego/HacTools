@@ -15,7 +15,7 @@
 
 set -e
 
-HACTOOLS_REPO="github.com/SalvadegoDev/HacTools"
+HACTOOLS_REPO="github.com/Salvadego/HacTools"
 HACTOOLS_VERSION="latest"
 HACTOOLS_INSTALL_DIR="${HACTOOLS_INSTALL_DIR:-$HOME/.config/hactools}"
 HACTOOLS_BIN_DIR="${HACTOOLS_INSTALL_DIR/bin}"

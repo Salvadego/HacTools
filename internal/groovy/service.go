@@ -3,8 +3,8 @@ package groovy
 import (
 	"fmt"
 
-	"github.com/SalvadegoDev/HacTools/internal/client"
-	"github.com/SalvadegoDev/HacTools/internal/models"
+	"github.com/Salvadego/HacTools/internal/client"
+	"github.com/Salvadego/HacTools/internal/models"
 )
 
 type GroovyExecutor struct {

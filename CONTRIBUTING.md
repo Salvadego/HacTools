@@ -22,7 +22,7 @@ I use GitHub to host code, to track issues and feature requests, as well as acce
 
 ### Report bugs using Github's [issue tracker]
 
-We use GitHub issues to track public bugs. Report a bug by [opening a new issue](https://github.com/SalvadegoDev/HacTools/issues/new); it's that easy!
+We use GitHub issues to track public bugs. Report a bug by [opening a new issue](https://github.com/Salvadego/HacTools/issues/new); it's that easy!
 
 ### Write bug reports with detail, background, and sample code
 

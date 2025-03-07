@@ -11,7 +11,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/SalvadegoDev/HacTools/internal/logger"
+	"github.com/Salvadego/HacTools/internal/logger"
 )
 
 type HACClient struct {

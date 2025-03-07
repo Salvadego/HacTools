@@ -7,7 +7,7 @@ import (
 	"net/url"
 
 	"github.com/anaskhan96/soup"
-	"github.com/SalvadegoDev/HacTools/internal/logger"
+	"github.com/Salvadego/HacTools/internal/logger"
 )
 
 func (c *HACClient) ImportScriptImpex(data map[string]any) (string, error) {

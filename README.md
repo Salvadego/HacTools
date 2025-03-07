@@ -13,9 +13,9 @@ CLI tools for easy interaction with SAP Hybris HAC (Hybris Administration Consol
 ### Using Go Install
 
 ```bash
-go install github.com/SalvadegoDev/HacTools/cmd/flex@latest
-go install github.com/SalvadegoDev/HacTools/cmd/groovy@latest
-go install github.com/SalvadegoDev/HacTools/cmd/impex@latest
+go install github.com/Salvadego/HacTools/cmd/flex@latest
+go install github.com/Salvadego/HacTools/cmd/groovy@latest
+go install github.com/Salvadego/HacTools/cmd/impex@latest
 ```
 
 ### Using Installation Script
@@ -24,10 +24,10 @@ For convenience, you can use this installation script:
 
 ```bash
 # Install or update to the latest version
-curl -sSL https://raw.githubusercontent.com/SalvadegoDev/HacTools/refs/heads/main/install.sh | bash
+curl -sSL https://raw.githubusercontent.com/Salvadego/HacTools/refs/heads/main/install.sh | bash
 
 # Install specific version
-curl -sSL https://raw.githubusercontent.com/SalvadegoDev/HacTools/refs/heads/main/install.sh | bash -s v1.0.0
+curl -sSL https://raw.githubusercontent.com/Salvadego/HacTools/refs/heads/main/install.sh | bash -s v1.0.0
 ```
 
 ## Usage
@@ -145,7 +145,7 @@ All commands share these common options:
 
 ```bash
 # Clone the repository
-git clone https://github.com/SalvadegoDev/HacTools.git
+git clone https://github.com/Salvadego/HacTools.git
 cd HacTools
 
 # Build all tools

@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"net/url"
 
-	"github.com/SalvadegoDev/HacTools/internal/logger"
-	"github.com/SalvadegoDev/HacTools/internal/models"
+	"github.com/Salvadego/HacTools/internal/logger"
+	"github.com/Salvadego/HacTools/internal/models"
 )
 
 func (c *HACClient) ExecuteGroovy(data map[string]any) (*models.GroovyResponse, error) {
