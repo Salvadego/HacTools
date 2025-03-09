@@ -5,10 +5,11 @@ import (
 	"os"
 
 	"github.com/Salvadego/HacTools/internal/client"
+	"github.com/Salvadego/HacTools/internal/editor"
 	"github.com/Salvadego/HacTools/internal/impex"
 	"github.com/Salvadego/HacTools/internal/logger"
-	"github.com/Salvadego/HacTools/models"
 	"github.com/Salvadego/HacTools/internal/options"
+	"github.com/Salvadego/HacTools/models"
 	"github.com/spf13/cobra"
 )
 
@@ -29,6 +30,15 @@ func init() {
 	rootCmd.PersistentFlags().BoolVarP(&distributedMode, "distributed", "d", false, "Enable legacyMode")
 	rootCmd.PersistentFlags().BoolVarP(&sldEnabled, "sld", "", false, "Enable Sld")
 	rootCmd.PersistentFlags().StringVarP(&logLevel, "log-level", "l", "error", "Log level (debug, info, error, none)")
+
+	editorCommand := editor.CreateEditorCommand(models.EditorConfig{
+		FilePattern:    "impex-script-*.impex",
+		InitialContent: "# Enter your Impex script here\n\n",
+		ExecutorFunc:   executorFunc,
+		CustomFlags:    []func(*cobra.Command){},
+	})
+
+	rootCmd.AddCommand(editorCommand)
 }
 
 var rootCmd = &cobra.Command{
@@ -73,6 +83,28 @@ var rootCmd = &cobra.Command{
 
 		return importer.DisplayResults(result)
 	},
+}
+
+func executorFunc(script string) error {
+	client := client.NewHACClient(conf.Address, conf.User, conf.Password)
+	if err := client.Login(); err != nil {
+		return fmt.Errorf("failed to login: %w", err)
+	}
+
+	importer := impex.NewImpexImporter(client)
+	options := models.ImpexExecuteOptions{
+		LegacyMode:          legacyMode,
+		EnableCodeExecution: enableCodeExecution,
+		DistributedMode:     distributedMode,
+		SldEnabled:          sldEnabled,
+	}
+
+	result, err := importer.ImportScript(script, options)
+	if err != nil {
+		return fmt.Errorf("failed to execute script: %w", err)
+	}
+
+	return importer.DisplayResults(result)
 }
 
 func main() {
