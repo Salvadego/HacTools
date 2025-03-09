@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/Salvadego/HacTools/internal/client"
-	"github.com/Salvadego/HacTools/internal/models"
+	"github.com/Salvadego/HacTools/models"
 )
 
 type GroovyExecutor struct {

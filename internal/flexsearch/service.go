@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"github.com/Salvadego/HacTools/internal/client"
-	"github.com/Salvadego/HacTools/internal/models"
+	"github.com/Salvadego/HacTools/models"
 	"github.com/olekukonko/tablewriter"
 )
 

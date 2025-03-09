@@ -6,7 +6,7 @@ import (
 	"net/url"
 
 	"github.com/Salvadego/HacTools/internal/logger"
-	"github.com/Salvadego/HacTools/internal/models"
+	"github.com/Salvadego/HacTools/models"
 )
 
 func (c *HACClient) ExecuteGroovy(data map[string]any) (*models.GroovyResponse, error) {

@@ -7,7 +7,7 @@ import (
 	"github.com/Salvadego/HacTools/internal/client"
 	"github.com/Salvadego/HacTools/internal/impex"
 	"github.com/Salvadego/HacTools/internal/logger"
-	"github.com/Salvadego/HacTools/internal/models"
+	"github.com/Salvadego/HacTools/models"
 	"github.com/Salvadego/HacTools/internal/options"
 	"github.com/spf13/cobra"
 )

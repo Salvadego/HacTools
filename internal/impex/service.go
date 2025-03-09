@@ -8,7 +8,7 @@ import (
 	"os"
 
 	"github.com/Salvadego/HacTools/internal/client"
-	"github.com/Salvadego/HacTools/internal/models"
+	"github.com/Salvadego/HacTools/models"
 )
 
 type ImpexImporter struct {

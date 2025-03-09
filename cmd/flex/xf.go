@@ -5,10 +5,11 @@ import (
 	"os"
 
 	"github.com/Salvadego/HacTools/internal/client"
+	"github.com/Salvadego/HacTools/internal/editor"
 	"github.com/Salvadego/HacTools/internal/flexsearch"
 	"github.com/Salvadego/HacTools/internal/logger"
-	"github.com/Salvadego/HacTools/internal/models"
 	"github.com/Salvadego/HacTools/internal/options"
+	"github.com/Salvadego/HacTools/models"
 	"github.com/spf13/cobra"
 )
 
@@ -37,6 +38,16 @@ func init() {
 	rootCmd.PersistentFlags().BoolVarP(&noAnalyze, "no-analyze", "A", false, "Do not analyze PK")
 	rootCmd.PersistentFlags().BoolVarP(&noBlacklist, "no-blacklist", "B", false, "Ignore column blacklist")
 	rootCmd.PersistentFlags().StringVarP(&logLevel, "log-level", "l", "error", "Log level (debug, info, error, none)")
+
+	editorCommand := editor.CreateEditorCommand(models.EditorConfig{
+		FilePattern:    "flexquery-*.sql",
+		InitialContent: "-- Enter your FlexSearch query here\n\n",
+		ExecutorFunc: executorFunc,
+		CustomFlags: []func(*cobra.Command){
+		},
+	})
+
+	rootCmd.AddCommand(editorCommand)
 }
 
 var rootCmd = &cobra.Command{
@@ -64,25 +75,29 @@ var rootCmd = &cobra.Command{
 			return fmt.Errorf("query cannot be empty")
 		}
 
-		client := client.NewHACClient(conf.Address, conf.User, conf.Password)
-		if err := client.Login(); err != nil {
-			return fmt.Errorf("failed to login: %w", err)
-		}
-
-		executor := flexsearch.NewFlexSearchExecutor(client)
-		result, err := executor.Execute(query, models.FlexExecuteOptions{
-			MaxCount:        maxCount,
-			NoAnalyze:       noAnalyze,
-			ColumnBlacklist: columnBlacklist,
-			NoBlacklist:     noBlacklist,
-		})
-
-		if err != nil {
-			return fmt.Errorf("failed to execute query: %w", err)
-		}
-
-		return executor.DisplayResults(result)
+		return executorFunc(query)
 	},
+}
+
+func executorFunc(query string) error {
+	client := client.NewHACClient(conf.Address, conf.User, conf.Password)
+	if err := client.Login(); err != nil {
+		return fmt.Errorf("failed to login: %w", err)
+	}
+
+	executor := flexsearch.NewFlexSearchExecutor(client)
+	result, err := executor.Execute(query, models.FlexExecuteOptions{
+		MaxCount:        maxCount,
+		NoAnalyze:       noAnalyze,
+		ColumnBlacklist: columnBlacklist,
+		NoBlacklist:     noBlacklist,
+	})
+
+	if err != nil {
+		return fmt.Errorf("failed to execute query: %w", err)
+	}
+
+	return executor.DisplayResults(result)
 }
 
 func main() {
