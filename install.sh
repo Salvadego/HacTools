@@ -170,8 +170,11 @@ wget -c "https://raw.githubusercontent.com/Salvadego/HacTools/refs/heads/main/ha
 chmod +x "$HACTOOLS_BIN_DIR/haccli"
 
 echo "Installation completed"
-echo "\n\n Write this at the end of your shell rc.\n\n [ -s '$HACCLI_DIR/haccli.sh' ] && . '$HACCLI_DIR/haccli.sh'"
-echo "To use right now: \n\nsource $HACTOOLS_BIN_DIR/haccli.sh\n"
+echo "Write this at the end of your shell rc."
+echo
+echo "[ -s '$HACCLI_DIR/haccli.sh' ] && . '$HACCLI_DIR/haccli.sh'"
+echo
+echo "To use right now: \n\nsource $HACTOOLS_BIN_DIR/haccli.sh"
 
 # Quick help
 echo "For help, run:"
