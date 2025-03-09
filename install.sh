@@ -166,15 +166,15 @@ fi
 
 echo "Installing wizard"
 
-wget -c "https://raw.githubusercontent.com/Salvadego/HacTools/refs/heads/main/hacwizard" -O "$HACTOOLS_BIN_DIR/haccli"
-chmod +x "$HACTOOLS_BIN_DIR/haccli"
+wget -c "https://raw.githubusercontent.com/Salvadego/HacTools/refs/heads/main/hacwizard" -O "$HACTOOLS_BIN_DIR/haccli.sh"
+chmod +x "$HACTOOLS_BIN_DIR/haccli.sh"
 
 echo "Installation completed"
 echo "Write this at the end of your shell rc."
 echo
-echo "[ -s \'$HACCLI_DIR/haccli.sh\' ] && . \'$HACCLI_DIR/haccli.sh\'"
+echo -e "[ -s \"$HACTOOLS_BIN_DIR/haccli.sh\" ] && . \"$HACTOOLS_BIN_DIR/haccli.sh\""
 echo
-echo "To use right now: \n\nsource $HACTOOLS_BIN_DIR/haccli.sh"
+echo -e "To use right now: \n\nsource $HACTOOLS_BIN_DIR/haccli.sh"
 
 # Quick help
 echo "For help, run:"

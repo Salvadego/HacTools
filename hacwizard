@@ -10,9 +10,9 @@ mkdir -p "$CLIENTS_DIR"
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'
-YELLOW='\033[0;33m'
+# YELLOW='\033[0;33m'
 CYAN='\033[0;36m'
-MAGENTA='\033[0;35m'
+# MAGENTA='\033[0;35m'
 BOLD='\033[1m'
 NC='\033[0m'
 
@@ -101,39 +101,45 @@ _haccli_select_file() {
 
     if $has_fzf; then
         if $has_bat; then
-            file=$(ls -A "$dir" | fzf --prompt="$prompt " --preview="bat $dir/{}")
+            file=$(ls -A "$dir" 2>/dev/null | fzf --prompt="$prompt " --preview="bat $dir/{} --language=sh" 2>/dev/null)
         else
-            file=$(ls -A "$dir" | fzf --prompt="$prompt " --preview="cat $dir/{}")
+            file=$(ls -A "$dir" 2>/dev/null | fzf --prompt="$prompt " --preview="cat $dir/{}" 2>/dev/null)
         fi
     else
-        local options=()
-        local i=1
+        if [ -z "$(ls -A "$dir" 2>/dev/null)" ]; then
+            _haccli_print_error "No files found in $dir"
+            return 1
+        fi
 
-        echo -e "${HACCLI_BOLD}Available files:${HACCLI_NC}"
+        echo -e "${BOLD}Available files:${NC}"
+        local i=1
+        local options=()
+
         for f in "$dir"/*; do
             if [ -f "$f" ]; then
                 local fname=$(basename "$f")
-                options+=("$fname")
+                options[$i]="$fname"
                 echo "  $i) $fname"
                 ((i++))
             fi
         done
 
-        if [ ${#options[@]} -eq 0 ]; then
+        if [ $i -eq 1 ]; then
             _haccli_print_error "No files found in $dir"
             return 1
         fi
 
         echo
-        echo -e "${HACCLI_BOLD}$prompt${HACCLI_NC} (Enter number or 'q' to quit)"
+        echo -e "${BOLD}$prompt${NC} (Enter number or 'q' to quit)"
+        local choice
         read -r choice
 
         if [[ "$choice" == "q" || "$choice" == "Q" ]]; then
             return 0
         fi
 
-        if [[ "$choice" =~ ^[0-9]+$ ]] && [ "$choice" -ge 1 ] && [ "$choice" -le ${#options[@]} ]; then
-            file="${options[$choice-1]}"
+        if [[ "$choice" =~ ^[0-9]+$ ]] && [ "$choice" -ge 1 ] && [ "$choice" -lt $i ]; then
+            file="${options[$choice]}"
         else
             _haccli_print_error "Invalid selection: $choice"
             return 1
@@ -166,7 +172,7 @@ _haccli_load_client_config() {
         return 1
     fi
 
-    . "$client_file"
+    source "$client_file"
 
     echo "export HACCLI_ACTIVE_CLIENT=\"$(basename "$client_file")\"" > "$CONFIG_DIR/active_client"
     echo "export HYBRIS_HAC_URL=\"$HYBRIS_HAC_URL\"" >> "$CONFIG_DIR/active_client"
@@ -195,7 +201,7 @@ haccli_select() {
     fi
 
     local file
-    file=$(_haccli_select_file "$HACCLI_CLIENTS_DIR" "Select client:")
+    file=$(_haccli_select_file "$CLIENTS_DIR" "Select client:")
 
     if [ -z "$file" ]; then
         _haccli_print_info "No client selected."
@@ -289,7 +295,7 @@ haccli_remove() {
     fi
 
     local file
-    file=$(_haccli_select_file "$HACCLI_CLIENTS_DIR" "Select client to remove:")
+    file=$(_haccli_select_file "$CLIENTS_DIR" "Select client to remove:")
 
     if [ -z "$file" ]; then
         _haccli_print_info "No client selected."
@@ -336,7 +342,7 @@ haccli_edit() {
             return 1
         fi
     else
-        file=$(_haccli_select_file "$HACCLI_CLIENTS_DIR" "Select client to edit:")
+        file=$(_haccli_select_file "$CLIENTS_DIR" "Select client to edit:")
         if [ -z "$file" ]; then
             _haccli_print_info "No client selected."
             return 0
@@ -400,14 +406,14 @@ haccli_current() {
     if [ -z "${HYBRIS_HAC_URL}" ] || [ -z "${HYBRIS_USER}" ] || [ -z "${HYBRIS_PASSWORD}" ] || [ -z "${HACCLI_ACTIVE_CLIENT}" ]; then
         echo
         _haccli_print_error "Warning: Environment variables are not set in your current shell!"
-        _haccli_print_info "Run: haccli_select to choose a client configuration"
+        _haccli_print_info "Run: haccli select to choose a client configuration"
     else
         if [ "${HYBRIS_HAC_URL}" != "${hac_url}" ] || 
            [ "${HYBRIS_USER}" != "${username}" ] || 
            [ "${HACCLI_ACTIVE_CLIENT}" != "${active_client}" ]; then
             echo
             _haccli_print_error "Warning: Environment variables don't match the saved configuration!"
-            _haccli_print_info "Run: haccli_select to update your environment"
+            _haccli_print_info "Run: haccli select to update your environment"
         else
             _haccli_print_success "Environment variables are correctly set in your current shell."
         fi
@@ -424,45 +430,45 @@ haccli_wizard() {
         existing_clients=1
     fi
 
-    local options
     if [ $existing_clients -eq 1 ]; then
-        options=("Select existing client" "Create new client" "Edit existing client" "Remove client" "Exit wizard")
+        echo "1) Select existing client"
+        echo "2) Create new client"
+        echo "3) Edit existing client"
+        echo "4) Remove client"
+        echo "5) Exit wizard"
     else
-        options=("Create new client" "Exit wizard")
+        echo "1) Create new client"
+        echo "2) Exit wizard"
     fi
 
-    PS3="Please select an option: "
-    select opt in "${options[@]}"; do
-        case $opt in
-            "Select existing client")
-                haccli_select
-                break
-                ;;
-            "Create new client")
-                haccli_new
-                break
-                ;;
-            "Edit existing client")
-                haccli_edit
-                break
-                ;;
-            "Remove client")
-                haccli_remove
-                break
-                ;;
-            "Exit wizard")
-                _haccli_print_info "Exiting wizard."
-                break
-                ;;
-            *) 
-                _haccli_print_error "Invalid option. Please try again."
-                ;;
+    echo -n "Please select an option: "
+    local choice
+    read choice
+
+    if [ $existing_clients -eq 1 ]; then
+        case $choice in
+            1) haccli_select ;;
+            2) haccli_new ;;
+            3) haccli_edit ;;
+            4) haccli_remove ;;
+            5) _haccli_print_info "Exiting wizard." ;;
+            *) _haccli_print_error "Invalid option. Please try again." ;;
         esac
-    done
+    else
+        case $choice in
+            1) haccli_new ;;
+            2) _haccli_print_info "Exiting wizard." ;;
+            *) _haccli_print_error "Invalid option. Please try again." ;;
+        esac
+    fi
 }
 
-# Main command function
 haccli() {
+    if [ $# -eq 0 ]; then
+        haccli_wizard
+        return
+    fi
+
     local cmd="$1"
     shift || true
 
@@ -505,4 +511,6 @@ haccli() {
     esac
 }
 
-_haccli_print_info "HACCLI functions loaded. Use 'haccli' to start."
+if [ -f "$CONFIG_DIR/active_client" ]; then
+    . "$CONFIG_DIR/active_client"
+fi
