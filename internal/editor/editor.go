@@ -100,7 +100,7 @@ You can optionally provide a template file as an argument.`,
 		},
 	}
 
-	cmd.Flags().StringVarP(&savePath, "save", "s", "", "Save content to file after editing")
+	cmd.Flags().StringVar(&savePath, "save", "", "Save content to file after editing")
 
 	for _, addFlag := range opts.CustomFlags {
 		addFlag(cmd)
