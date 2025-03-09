@@ -172,7 +172,7 @@ chmod +x "$HACTOOLS_BIN_DIR/haccli"
 echo "Installation completed"
 echo "Write this at the end of your shell rc."
 echo
-echo "[ -s '$HACCLI_DIR/haccli.sh' ] && . '$HACCLI_DIR/haccli.sh'"
+echo "[ -s \'$HACCLI_DIR/haccli.sh\' ] && . \'$HACCLI_DIR/haccli.sh\'"
 echo
 echo "To use right now: \n\nsource $HACTOOLS_BIN_DIR/haccli.sh"
 
