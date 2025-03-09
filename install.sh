@@ -172,11 +172,13 @@ chmod +x "$HACTOOLS_BIN_DIR/haccli"
 # Add example usage
 echo "Installation completed!"
 
-echo '
-# HACCLI - Hybris Admin Console Wizard CLI
-export HACCLI_DIR="$HOME/.config/haccli"
-[ -s "$HACCLI_DIR/haccli.sh" ] && . "$HACCLI_DIR/haccli.sh"
-'
+echo "
+
+Write this at the end of your shell rc.
+
+[ -s '$HACCLI_DIR/haccli.sh' ] && . '$HACCLI_DIR/haccli.sh'
+
+"
 
 echo "To use right now:
 source $HACTOOLS_BIN_DIR/haccli.sh
