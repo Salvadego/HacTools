@@ -48,6 +48,22 @@ Or pass them directly as command line arguments:
 xf --address="https://your-hybris-instance:9002/hac" --user="admin" --password="your-password" "SELECT * FROM {Product}"
 ```
 
+You can also create profiles using the haccli tool.
+
+```bash
+haccli new
+```
+
+See more options with:
+```bash
+haccli help
+```
+
+Or simply:
+```bash
+haccli
+```
+
 ### FlexSearch (xf)
 
 Execute FlexibleSearch queries against Hybris:
