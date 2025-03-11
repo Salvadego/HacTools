@@ -235,7 +235,7 @@ haccli_new() {
     export HYBRIS_HAC_URL="$hac_url"
     export HYBRIS_USER="$hac_username"
     export HYBRIS_PASSWORD="$hac_pass"
-    EOF
+EOF
 
     chmod +x "$CLIENTS_DIR/$client"
 
@@ -362,7 +362,7 @@ haccli_edit() {
     export HYBRIS_HAC_URL="$hac_url"
     export HYBRIS_USER="$hac_username"
     export HYBRIS_PASSWORD="$hac_pass"
-    EOF
+EOF
 
     chmod +x "$client_file"
 
