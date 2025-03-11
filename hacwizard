@@ -105,45 +105,34 @@ _haccli_select_file() {
         else
             file=$(ls -A "$dir" 2>/dev/null | fzf --prompt="$prompt " --preview="cat $dir/{}" 2>/dev/null)
         fi
-    else
-        if [ -z "$(ls -A "$dir" 2>/dev/null)" ]; then
+    fi
+
+    if [ -z "$file" ]; then
+        echo -e "${BOLD}$prompt${NC}"
+        local files=()
+        while IFS= read -r fname; do
+            files+=("$fname")
+        done < <(ls -A "$dir" 2>/dev/null)
+
+        if [ ${#files[@]} -eq 0 ]; then
             _haccli_print_error "No files found in $dir"
             return 1
         fi
 
-        echo -e "${BOLD}Available files:${NC}"
-        local i=1
-        local options=()
-
-        for f in "$dir"/*; do
-            if [ -f "$f" ]; then
-                local fname=$(basename "$f")
-                options[$i]="$fname"
-                echo "  $i) $fname"
-                ((i++))
+        select fname in "${files[@]}"; do
+            if [ -n "$fname" ]; then
+                file="$fname"
+                break
+            else
+                echo "Invalid selection. Please try again."
             fi
         done
+    fi
 
-        if [ $i -eq 1 ]; then
-            _haccli_print_error "No files found in $dir"
-            return 1
-        fi
-
-        echo
-        echo -e "${BOLD}$prompt${NC} (Enter number or 'q' to quit)"
-        local choice
-        read -r choice
-
-        if [[ "$choice" == "q" || "$choice" == "Q" ]]; then
-            return 0
-        fi
-
-        if [[ "$choice" =~ ^[0-9]+$ ]] && [ "$choice" -ge 1 ] && [ "$choice" -lt $i ]; then
-            file="${options[$choice]}"
-        else
-            _haccli_print_error "Invalid selection: $choice"
-            return 1
-        fi
+    if [ -n "$file" ]; then
+        echo "$file"
+    else
+        return 1
     fi
 
     echo "$file"
@@ -243,10 +232,10 @@ haccli_new() {
     echo
 
     cat << EOF > "$CLIENTS_DIR/$client"
-export HYBRIS_HAC_URL="$hac_url"
-export HYBRIS_USER="$hac_username"
-export HYBRIS_PASSWORD="$hac_pass"
-EOF
+    export HYBRIS_HAC_URL="$hac_url"
+    export HYBRIS_USER="$hac_username"
+    export HYBRIS_PASSWORD="$hac_pass"
+    EOF
 
     chmod +x "$CLIENTS_DIR/$client"
 
@@ -370,10 +359,10 @@ haccli_edit() {
     hac_pass=${hac_pass:-$current_pass}
 
     cat << EOF > "$client_file"
-export HYBRIS_HAC_URL="$hac_url"
-export HYBRIS_USER="$hac_username"
-export HYBRIS_PASSWORD="$hac_pass"
-EOF
+    export HYBRIS_HAC_URL="$hac_url"
+    export HYBRIS_USER="$hac_username"
+    export HYBRIS_PASSWORD="$hac_pass"
+    EOF
 
     chmod +x "$client_file"
 
@@ -409,13 +398,13 @@ haccli_current() {
         _haccli_print_info "Run: haccli select to choose a client configuration"
     else
         if [ "${HYBRIS_HAC_URL}" != "${hac_url}" ] || 
-           [ "${HYBRIS_USER}" != "${username}" ] || 
-           [ "${HACCLI_ACTIVE_CLIENT}" != "${active_client}" ]; then
-            echo
-            _haccli_print_error "Warning: Environment variables don't match the saved configuration!"
-            _haccli_print_info "Run: haccli select to update your environment"
-        else
-            _haccli_print_success "Environment variables are correctly set in your current shell."
+            [ "${HYBRIS_USER}" != "${username}" ] || 
+            [ "${HACCLI_ACTIVE_CLIENT}" != "${active_client}" ]; then
+                    echo
+                    _haccli_print_error "Warning: Environment variables don't match the saved configuration!"
+                    _haccli_print_info "Run: haccli select to update your environment"
+                else
+                    _haccli_print_success "Environment variables are correctly set in your current shell."
         fi
     fi
 }
