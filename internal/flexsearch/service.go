@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"sync"
 
 	"github.com/Salvadego/HacTools/internal/client"
 	"github.com/Salvadego/HacTools/models"
@@ -37,9 +38,38 @@ func (e *FlexSearchExecutor) Execute(query string, opts models.FlexExecuteOption
 	if !opts.NoBlacklist {
 		blacklist = opts.ColumnBlacklist
 	}
+
 	resp, err := e.Client.ExecuteFlexSearch(data, blacklist)
 	if err != nil {
 		return nil, err
+	}
+
+	if !opts.NoAnalyze {
+
+		var wg sync.WaitGroup
+
+		var mutex sync.Mutex
+
+		for rowIdx, row := range resp.ResultList {
+			wg.Add(1)
+			go func(rowIdx int, row []string) {
+				defer wg.Done()
+
+				for colIdx, cell := range row {
+					if isPotentialPK(cell) {
+						pkInfo, err := e.Client.AnalyzePK(cell)
+						if err == nil && pkInfo != nil && pkInfo.ComposedTypeCode != "" {
+
+							mutex.Lock()
+                            resp.ResultList[rowIdx][colIdx] = fmt.Sprintf("%s(%s)", pkInfo.ComposedTypeCode, cell[7:])
+							mutex.Unlock()
+						}
+					}
+				}
+			}(rowIdx, row)
+		}
+
+		wg.Wait()
 	}
 
 	if resp.Exception != nil {
@@ -143,4 +173,18 @@ func (e *FlexSearchExecutor) displayWithPager(content string) error {
 func isPipe() bool {
 	fi, _ := os.Stdout.Stat()
 	return fi.Mode()&os.ModeCharDevice == 0
+}
+
+func isPotentialPK(s string) bool {
+	if len(s) < 8 {
+		return false
+	}
+
+	for _, c := range s {
+		if c < '0' || c > '9' {
+			return false
+		}
+	}
+
+	return true
 }
